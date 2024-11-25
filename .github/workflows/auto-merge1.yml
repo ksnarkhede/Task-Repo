@@ -2,7 +2,7 @@ name: Auto Merge
 
 on:
   workflow_run:
-    workflows:
+    workflows: 
       - Workflow 1 # Ensure this matches the name of Workflow 1
     types:
       - completed
@@ -22,12 +22,23 @@ jobs:
       - name: Extract Pull Request Number
         id: extract-pr
         run: |
-          if [ "${{ github.event.workflow_run.pull_requests }}" == "[]" ]; then
+          # Get the pull_requests array from the event payload
+          PR_ARRAY=$(echo '${{ toJson(github.event.workflow_run.pull_requests) }}' | jq '.')
+          
+          # Ensure the array isn't empty
+          if [ "$PR_ARRAY" == "[]" ]; then
             echo "No pull request found in the event payload. Exiting."
             exit 1
           fi
-          # Extract the pull request number from the event payload
-          PR_NUMBER=$(echo "${{ toJson(github.event.workflow_run.pull_requests) }}" | jq -r '.[0].number')
+
+          # Extract the PR number
+          PR_NUMBER=$(echo "$PR_ARRAY" | jq -r '.[0].number')
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "Failed to extract pull request number. Exiting."
+            exit 1
+          fi
+
           echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
           echo "Pull Request Number: $PR_NUMBER"
 
@@ -67,13 +78,15 @@ jobs:
       - name: Ensure PR is mergeable
         if: ${{ steps.approvals.outcome == 'success' }}
         id: mergeable
+        env:
+          PR_NUMBER: ${{ env.PR_NUMBER }}
         run: |
-          if [ -z "${{ env.PR_NUMBER }}" ]; then
+          if [ -z "${PR_NUMBER}" ]; then
             echo "No pull request number found in the environment. Exiting."
             exit 1
           fi
 
-          pr_details=$(gh pr view ${{ env.PR_NUMBER }} --json mergeable --jq .)
+          pr_details=$(gh pr view ${PR_NUMBER} --json mergeable --jq .)
           echo "PR Details: $pr_details"
 
           # Fetch the mergeable field
