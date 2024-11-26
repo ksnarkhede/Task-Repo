@@ -23,11 +23,11 @@ jobs:
 
     # Step 3: Compile Java program
     - name: Compile Java program
-      run: javac Main.java
+      run: javac Main.java 
 
     # Step 4: Run Java program
     - name: Run Java program
-      run: java Main
+      run: javacc Main
 
     # Step 5: Running JAVA CI (optional step for your CI pipeline)
     - name: Step in Java CI
