@@ -1,0 +1,26 @@
+name: Run Embedded Python Script on PR Review
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  run-python-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Run embedded Python script
+      run: |
+        echo "88" | python -c "
+import sys
+a = input()
+print(int(a) + 2 + 10)
+"
