@@ -9,7 +9,9 @@ on:
 jobs:
   final_check:
     runs-on: ubuntu-latest
-    if: ${{ success() }}  # Ensures that this job runs only if all workflows succeeded
+
+    if: ${{ success() }}
+
 
     steps:
       - name: Checkout code
