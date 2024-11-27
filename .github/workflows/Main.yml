@@ -9,6 +9,7 @@ on:
 jobs:
   build-and-trigger:
     runs-on: ubuntu-latest
+    if: ${{ success() }}
 
     steps:
     # Step 1: Checkout repository
